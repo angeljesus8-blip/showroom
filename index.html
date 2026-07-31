@@ -184,6 +184,17 @@
     padding:11px 20px;background:#fff;border-bottom:1px solid var(--linea);
   }
   .modal3d .barra3d span{font-size:14.5px;font-weight:800;letter-spacing:-.02em}
+  /* El visor de HUAWEI siempre abre en su color por omisión y no se le puede
+     indicar cuál mostrar. Se recuerda el elegido para tocarlo ahí adentro. */
+  .recuerda{
+    display:flex;align-items:center;gap:9px;
+    font-size:12.5px;font-weight:600;color:var(--gris);
+  }
+  .recuerda b{color:var(--tinta);font-weight:800}
+  .recuerda .bolita{
+    width:22px;height:22px;border-radius:50%;flex:none;
+    box-shadow:0 0 0 1.5px var(--linea), 0 1px 3px rgba(0,0,0,.15);
+  }
   .modal3d .barra3d button{
     border:none;background:var(--tinta);color:#fff;border-radius:11px;
     padding:10px 20px;font-family:var(--tipo);font-size:14px;font-weight:700;cursor:pointer;
@@ -257,6 +268,10 @@
 <div class="modal3d" id="modal3d">
   <div class="barra3d">
     <span id="titulo3d"></span>
+    <div class="recuerda" id="recuerda">
+      <span class="bolita" id="bolita3d"></span>
+      <span>Elígelo en <b id="color3d"></b></span>
+    </div>
     <button id="cerrar3d">Cerrar</button>
   </div>
   <div class="hueco" id="hueco3d"><iframe id="marco3d" title="Visor 3D HUAWEI"></iframe></div>
@@ -453,6 +468,10 @@ new ResizeObserver(ajustar3d).observe(hueco3d);
 
 $('#en3d').onclick = () => {
   $('#titulo3d').textContent = eq().nombre;
+  // No se le puede indicar al visor qué color mostrar (solo acepta el idioma),
+  // así que al menos se recuerda cuál venía elegido para tocarlo ahí dentro.
+  $('#color3d').textContent = color().n;
+  $('#bolita3d').style.background = degradado(color());
   modal.classList.add('abierto');
   if (!marco3d.src) marco3d.src = window.VISOR_3D;
   ajustar3d();

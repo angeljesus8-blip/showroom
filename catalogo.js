@@ -67,10 +67,12 @@ window.CATALOGO = [
         fotos: ['promax-dorado-1.webp', 'promax-dorado-2.webp', 'promax-dorado-3.webp',
                 'promax-dorado-4.webp', 'promax-dorado-5.webp'] },
 
-      // Este trae una sola vista: en la web de HUAWEI aparece agotado y no publican
-      // su carrusel. La foto sale de la sección de diseño de la ficha del equipo.
+      /* Este trae dos vistas, no cinco: en la web de HUAWEI aparece AGOTADO y por
+         eso no publican su carrusel. La del dorso sale de la sección de diseño de
+         la ficha; la del detalle de cámara, de la foto oficial de los cuatro
+         colores. Si algún día lo reponen, se bajan las cinco como los demás. */
       { n: 'Tornasol', sistema: 'Blaze Purple',   hex: '#7e78c0', hex2: '#fde9d1',
-        fotos: ['promax-tornasol-1.webp'] }
+        fotos: ['promax-tornasol-1.webp', 'promax-tornasol-2.webp'] }
     ],
 
     specs: [
