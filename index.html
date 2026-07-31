@@ -47,16 +47,24 @@
   header h1{margin:0;font-size:16.5px;font-weight:700;letter-spacing:-.01em}
   header p{margin:2px 0 0;font-size:12.5px;color:var(--gris);font-weight:500}
 
+  /* Va antes de las media queries: si se declara después, gana por orden
+     y anula el acomodo en dos columnas del modo horizontal. */
+  .cuerpo{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+
   /* ── Visor oficial ── */
   .visor{
     position:relative;
     flex:1 1 auto;
-    min-height:50vh;
+    min-height:56vh;
     background:#f4f5f8;
+    display:flex; align-items:center; justify-content:center;
   }
+  /* El ancho lo fija el guion en función del alto: el visor de HUAWEI acomoda
+     sus botones encima del equipo cuando el marco le queda ancho y bajo. */
   .visor iframe{
     display:block;
-    width:100%; height:100%;
+    height:100%;
+    width:100%;
     border:0;
   }
 
@@ -128,6 +136,7 @@
   .specs{
     flex:1 1 auto;overflow-y:auto;
     display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    align-content:start;   /* si no, las filas se estiran a lo alto de la columna */
     gap:0 26px;margin-top:12px;padding-bottom:14px;
     -webkit-overflow-scrolling:touch;
   }
@@ -145,11 +154,10 @@
   }
   @media (orientation:landscape) and (min-width:900px){
     .cuerpo{flex-direction:row}
+    .visor{min-height:0}
     .ficha{width:40%;border-top:none;border-left:1px solid var(--linea)}
     .gancho{display:block}
   }
-
-  .cuerpo{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 </style>
 </head>
 <body>
@@ -232,6 +240,19 @@ function cargarVisor() {
   vigilante = setTimeout(() => caido.classList.add('on'), 20000);
   marco.src = VISOR_3D;
 }
+
+/* El visor de HUAWEI acomoda su selector de modelo y de color encima del equipo
+   cuando el marco le queda ancho y bajo. Se le limita el ancho en proporción a
+   su alto para que siempre tenga sitio donde poner los botones. */
+const seccionVisor = document.querySelector('.visor');
+function ajustarMarco() {
+  const alto = seccionVisor.clientHeight;
+  const ancho = seccionVisor.clientWidth;
+  if (!alto || !ancho) return;
+  marco.style.width = Math.min(ancho, Math.round(alto * 1.05)) + 'px';
+}
+new ResizeObserver(ajustarMarco).observe(seccionVisor);
+ajustarMarco();
 
 marco.addEventListener('load', () => clearTimeout(vigilante));
 marco.addEventListener('error', () => caido.classList.add('on'));
