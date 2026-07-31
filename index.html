@@ -60,14 +60,14 @@
        Si no coincide, se ve el recuadro del marco cuando no ocupa todo el ancho. */
     background:#f1f3f5;
     overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
   }
-  /* Alto y ancho los fija el guion. El marco se ancla abajo porque puede ser
-     más alto que lo que se ve: lo que se recorta es el vacío de arriba. */
+  /* Medidas y zoom los fija el guion. Si el visor no cabe a su tamaño bueno,
+     se reduce con zoom (no se recorta), para que el equipo entre completo. */
   .visor iframe{
     display:block;
-    position:absolute; bottom:0; left:50%;
-    transform:translateX(-50%);
     border:0;
+    transform-origin:center center;
   }
 
   /* Aviso cuando el visor no carga (sin internet o cambió la dirección) */
@@ -182,6 +182,17 @@
     .nube{max-width:38%}
     .nube .v{font-size:14px}
   }
+
+  /* En ventanas bajitas cada píxel de alto se le da al visor: mientras menos
+     tenga, más lo achica el zoom y más chico se ve el equipo. */
+  @media (max-height:760px){
+    header{padding:9px 22px}
+    header img{height:30px}
+    header p{display:none}
+    .ficha{padding-top:8px;padding-bottom:8px}
+    .verchar{padding:10px 18px;font-size:13.5px}
+    .visor{min-height:0}
+  }
 </style>
 </head>
 <body>
@@ -267,9 +278,10 @@ function cargarVisor() {
    mide menos de unos 730 px de alto, los botones caen sobre el equipo. Y no se
    arregla estrechándolo, porque el ancho no cambia el alto del equipo.
 
-   Lo que sí funciona: darle al marco esa altura mínima aunque no quepa, anclarlo
-   abajo y recortar lo que sobra por arriba — que es justo el vacío sobre el
-   equipo. Así los botones quedan siempre despejados. */
+   Lo que sí funciona: dibujarlo siempre con esa altura mínima y, si no cabe en
+   la pantalla, REDUCIRLO CON ZOOM. Recortar el sobrante no sirve: en ventanas
+   bajitas deja de comerse el vacío de arriba y empieza a cortarle la cabeza al
+   equipo. Con zoom entra completo, en proporción y con los botones despejados. */
 const ALTO_MINIMO = 780;
 const seccionVisor = document.querySelector('.visor');
 
@@ -278,14 +290,18 @@ function ajustarMarco() {
   const ancho = seccionVisor.clientWidth;
   if (!alto || !ancho) return;
 
-  const altoMarco = Math.max(alto, ALTO_MINIMO);
-  const util = Math.min(ancho, Math.round(altoMarco * 1.05));
+  const escala = Math.min(1, alto / ALTO_MINIMO);
+  const altoMarco = Math.round(Math.max(alto, ALTO_MINIMO));
+  // El ancho se pide "en grande" porque el zoom lo va a encoger después
+  const anchoMarco = Math.round(Math.min(ancho / escala, altoMarco * 1.05));
 
   marco.style.height = altoMarco + 'px';
-  marco.style.width = util + 'px';
-  // Las nubes cubren solo lo que se ve, y del ancho del marco: si se les deja
-  // el de la sección, en pantalla ancha se van a las orillas.
-  document.getElementById('nubes').style.width = util + 'px';
+  marco.style.width = anchoMarco + 'px';
+  marco.style.transform = escala < 1 ? `scale(${escala.toFixed(4)})` : 'none';
+
+  // Las nubes van sobre el tamaño YA reducido, y del ancho del marco: si se les
+  // deja el de la sección, en pantalla ancha se van a las orillas.
+  document.getElementById('nubes').style.width = Math.round(anchoMarco * escala) + 'px';
 }
 new ResizeObserver(ajustarMarco).observe(seccionVisor);
 ajustarMarco();
