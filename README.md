@@ -1,80 +1,65 @@
-# Catálogo 3D — Odemás Angelópolis (HES 1217)
+# Catálogo — Odemás Angelópolis (HES 1217)
 
 **En línea:** <https://angeljesus8-blip.github.io/showroom-hes1217/>
 · QR para abrirlo en las tablets: `QR_showroom.png`
 
-Muestra en 3D para las **tablets de piso**: el cliente gira el equipo con el dedo
-y le cambia el color, aunque no haya pieza física en exhibición.
+Catálogo para las **tablets de piso**: el cliente ve el equipo, le cambia el color,
+compara memorias y ve el precio, aunque no haya pieza en exhibición.
 
-La vista 3D es el **visor oficial de HUAWEI**, embebido tal cual desde su propio
-proveedor. No se copia nada: es el mismo visor que Huawei publica en su página, así
-que el equipo se ve exactamente como es. Trae su propio selector de modelo y de
-color, en español.
+## ⚠️ Aquí se cobra en tienda
 
-Las características salen como **nubes flotando junto al equipo**: el cliente toca
-"Ver características" y van apareciendo una tras otra. Van a los lados, nunca encima
-del producto, y se pueden seguir girando el equipo con ellas puestas.
-
-**Por qué a los lados y no ancladas a cada pieza:** el visor es de otro sitio, así que
-no se puede saber dónde está el equipo dentro ni hacia dónde lo giró el cliente. Lo que
-sí se sabe es que queda centrado y gira sobre su eje — por eso el centro siempre está
-libre y ahí es donde no se ponen nubes.
+Esta pantalla es para **mostrar** y que la venta se cierre en el mostrador. **Nunca**
+meter enlaces a la tienda en línea de HUAWEI ni de nadie, y **los precios salen de las
+fuentes de la tienda** (tabla de preventa del tablero, reportes del POS), nunca
+copiados de la web del fabricante: esos son los precios de ellos.
 
 ---
 
-## ⚠️ Necesita internet
+## Cómo funciona
 
-El visor viene de la página de HUAWEI, así que **sin wifi no hay 3D**. La app abre
-igual y muestra un aviso pidiendo revisar la conexión, en vez de quedarse en blanco.
+Al elegir **modelo** o **color** cambian juntas las fotos, el precio, las memorias
+disponibles y las características. Todo sale de `catalogo.js`.
 
-## ⚠️ La dirección del visor va a cambiar
-
-La dirección del visor pertenece a una campaña (`project-h-2026q204-alpha`: trae el
-trimestre y la palabra "alpha"). **Cuando Huawei cambie de campaña, va a dejar de
-cargar.** Si eso pasa:
-
-1. Entra a la ficha del equipo en `consumer.huawei.com`
-2. Abre el visor 3D (el botón que dice **3D**)
-3. Mira el `src` del iframe que se abre
-4. Cambia `VISOR_3D` en `index.html` por esa dirección
-5. Súbele la versión a `sw.js` y haz push
+- **Fotos:** los renders oficiales de HUAWEI, guardados en `fotos/`. Cada color trae
+  sus vistas (dorso, ángulos, perfil, detalle) y se pasan arrastrando.
+- **Características:** salen como nubes flotando junto al equipo al tocar
+  *"Ver características"*. Van a los lados, nunca encima del producto.
+- **Girarlo en 3D:** abre el visor oficial de HUAWEI a pantalla completa. Está
+  revisado: no trae enlaces ni botones de compra.
 
 ---
 
-## Actualizar la ficha o agregar equipos
+## Actualizar precios o agregar equipos
 
-Todo vive en **`catalogo.js`**. Es el único archivo que se toca para contenido.
-Arriba del archivo están las instrucciones completas.
-
-Las nubes salen del campo **`nubes`** de cada equipo: máximo 5, y son **ganchos de
-venta**, no la ficha completa. Texto corto, que se lea de lejos ("200 MP", no "Cámara
-principal de 200 megapíxeles con apertura f/2.6"). Si un equipo no trae `nubes`, se
-usan las primeras 5 de `specs`.
-
-**Ojo:** el selector de arriba (el del visor 3D) es de Huawei y **no se puede
-sincronizar** con nuestra ficha — el visor no acepta que le digan qué modelo mostrar.
-Por eso el selector de la ficha va rotulado "FICHA TÉCNICA", para que se entienda que
-son dos cosas distintas.
+Todo vive en **`catalogo.js`**, con las instrucciones arriba del archivo.
 
 Después de cualquier cambio, **sube el número de versión en `sw.js`**
-(`const VERSION = 'showroom-v3'` → `'showroom-v4'`). Si no, las tablets siguen
+(`const VERSION = 'showroom-v9'` → `'showroom-v10'`). Si no, las tablets siguen
 mostrando lo viejo porque lo tienen guardado.
 
-### Precios
+### Agregar las fotos de un color
 
-No se muestran, por decisión de Ángel: la app dice *"Pregunta el precio a tu asesor"*,
-así ninguna promo vencida contradice al mostrador.
+En la página del equipo en `consumer.huawei.com`, elige ese color y guarda las 5 fotos
+del carrusel (las de 800×800 que vienen del CDN de la tienda). Se nombran
+`modelo-color-1.webp` … `-5.webp` y se listan en el campo `fotos` de ese color.
+
+Si un color no tiene las 5, no pasa nada: el visor muestra las que haya. El
+**Tornasol** del Pro Max, por ejemplo, trae una sola: en la web de HUAWEI aparece
+agotado y no publican su carrusel.
 
 ---
 
-## Instalar en las tablets de tienda
+## Instalar en las tablets
 
 1. Abre el link en Chrome de la tablet.
 2. Menú ⋮ → **Agregar a pantalla de inicio**.
 3. Ábrelo desde el icono: entra a pantalla completa, sin barra de navegador.
 
-Si nadie la toca por ~1.5 minutos, el visor **se reinicia solo**, para que el
-siguiente cliente no lo encuentre girado y en otro color.
+Si nadie la toca ~1.5 minutos, vuelve sola al primer equipo, lista para el siguiente
+cliente.
+
+**Sin wifi el catálogo funciona completo** (las fotos están guardadas en la tablet).
+Lo único que necesita señal es el botón de girar en 3D.
 
 ---
 
@@ -82,10 +67,10 @@ siguiente cliente no lo encuentre girado y en otro color.
 
 | Archivo | Qué es |
 |---|---|
-| `catalogo.js` | **Los datos.** Equipos, medidas, colores, características. |
-| `index.html` | La pantalla: visor embebido + ficha. `VISOR_3D` es la dirección del visor. |
-| `sw.js` | Hace que el cascarón abra rápido. Súbele la versión al actualizar. |
-| `modelo3d.js` + `vendor/` | **Respaldo, hoy sin usar.** Motor que dibuja los equipos por código a partir de sus medidas. Quedó de la versión anterior: si el visor de Huawei desaparece y no hay reemplazo, se puede reactivar. |
+| `catalogo.js` | **Los datos.** Equipos, precios, colores, fotos, características. Lo único que se toca. |
+| `index.html` | La pantalla completa: visor, selectores, nubes y el 3D. |
+| `fotos/` | Renders oficiales, uno por color y vista. |
+| `sw.js` | Hace que abra sin internet. Súbele la versión al actualizar. |
 
 ## Probar en la computadora
 

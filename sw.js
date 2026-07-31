@@ -1,17 +1,18 @@
 /* ============================================================
-   SHOWROOM 3D — HES 1217
+   SHOWROOM — HES 1217
    Service worker: guarda la app en la tablet para que abra
    aunque el wifi de tienda se caiga.
 
-   ⚠️ AL ACTUALIZAR catalogo.js (precios, equipos nuevos),
+   Las fotos SÍ se guardan (están en el proyecto), así que sin
+   internet el catálogo funciona completo. Lo único que necesita
+   señal es el visor 3D, que viene de la página de HUAWEI.
+
+   ⚠️ AL ACTUALIZAR catalogo.js (precios, equipos, fotos),
       SUBE ESTE NÚMERO. Si no, las tablets siguen mostrando
       la versión vieja porque la tienen guardada.
    ============================================================ */
-const VERSION = 'showroom-v8';
+const VERSION = 'showroom-v9';
 
-/* La vista 3D viene de la página de HUAWEI y NO se puede guardar: sin internet
-   la app abre, pero el visor muestra el aviso de "revisa el wifi".
-   modelo3d.js y three siguen en el repo como respaldo, sin usarse. */
 const ARCHIVOS = [
   './',
   './index.html',
@@ -42,19 +43,27 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
 
+  const url = new URL(e.request.url);
+  // El visor 3D es de otro sitio: no se guarda ni se intercepta.
+  if (url.origin !== location.origin) return;
+
+  // Las fotos no cambian nunca: primero lo guardado, así el catálogo
+  // se siente instantáneo y no gasta datos de la tablet.
+  const esFoto = url.pathname.includes('/fotos/');
+
   e.respondWith((async () => {
-    // Primero la red, para que un catálogo actualizado se vea al momento;
-    // si no hay señal, se sirve lo guardado.
+    const cache = await caches.open(VERSION);
+
+    if (esFoto) {
+      const guardada = await cache.match(e.request);
+      if (guardada) return guardada;
+    }
     try {
       const red = await fetch(e.request);
-      if (red && red.ok) {
-        const cache = await caches.open(VERSION);
-        cache.put(e.request, red.clone());
-      }
+      if (red && red.ok) cache.put(e.request, red.clone());
       return red;
     } catch {
-      const guardado = await caches.match(e.request);
-      return guardado || caches.match('./index.html');
+      return (await cache.match(e.request)) || cache.match('./index.html');
     }
   })());
 });
