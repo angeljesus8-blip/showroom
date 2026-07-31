@@ -7,7 +7,7 @@
       SUBE ESTE NÚMERO. Si no, las tablets siguen mostrando
       la versión vieja porque la tienen guardada.
    ============================================================ */
-const VERSION = 'showroom-v1';
+const VERSION = 'showroom-v2';
 
 const ARCHIVOS = [
   './',

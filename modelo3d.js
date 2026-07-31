@@ -93,23 +93,87 @@ function alFrente(m, nivel = 1) {
 
 /* ── Materiales ─────────────────────────────────────────── */
 
-function matCuerpo(hex, acabado) {
+/**
+ * Pinta la pieza con un degradado entre dos tonos, vértice por vértice.
+ * Los equipos reales no son de un color plano: van de una tonalidad a otra
+ * en diagonal. Se hace con color por vértice (y no con una textura) para que
+ * el degradado siga siendo continuo en el canto lateral y en el módulo.
+ * @param {number} grados  dirección del degradado. El valor por omisión hace
+ *   que el primer tono quede arriba y el segundo abajo, en diagonal.
+ */
+function pintarDegradado(geom, hexA, hexB, grados = -55) {
+  const cA = new THREE.Color(hexA), cB = new THREE.Color(hexB);
+  geom.computeBoundingBox();
+  const bb = geom.boundingBox;
+  const pos = geom.attributes.position;
+  const a = grados * Math.PI / 180;
+  const dx = Math.cos(a), dy = Math.sin(a);
+
+  // Rango que cubre la proyección de la caja sobre la dirección del degradado
+  let min = Infinity, max = -Infinity;
+  for (const x of [bb.min.x, bb.max.x]) {
+    for (const y of [bb.min.y, bb.max.y]) {
+      const p = x * dx + y * dy;
+      min = Math.min(min, p); max = Math.max(max, p);
+    }
+  }
+  const span = (max - min) || 1;
+
+  const col = new THREE.Float32BufferAttribute(pos.count * 3, 3);
+  const c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const t = ((pos.getX(i) * dx + pos.getY(i) * dy) - min) / span;
+    c.copy(cA).lerp(cB, Math.max(0, Math.min(1, t)));
+    col.setXYZ(i, c.r, c.g, c.b);
+  }
+  geom.setAttribute('color', col);
+  return geom;
+}
+
+/**
+ * El color lo pone el degradado por vértice, por eso el material va en blanco.
+ * El dorso es cristal de color, no metal: con metalness alto el color se apaga
+ * (en PBR el metal no tiene componente difusa) y el equipo sale grisáceo.
+ * El brillo se consigue con clearcoat, que es justo una capa de laca encima.
+ */
+function matCuerpo(acabado) {
   const brillante = acabado === 'brillante';
   return new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(hex),
-    metalness: brillante ? 0.80 : 0.30,
-    roughness: brillante ? 0.18 : 0.52,
-    clearcoat: brillante ? 1.0 : 0.30,
-    clearcoatRoughness: brillante ? 0.06 : 0.40
+    color: 0xffffff,
+    vertexColors: true,
+    metalness: 0.04,
+    roughness: brillante ? 0.24 : 0.62,
+    clearcoat: brillante ? 1.0 : 0.28,
+    clearcoatRoughness: brillante ? 0.05 : 0.42
   });
 }
 
-/** Marco lateral: el mismo color, pero pulido como aluminio. */
-function matMarco(hex) {
+/** Canto lateral: mismo tono que el cuerpo, pero pulido como aluminio. */
+function matMarco() {
+  return new THREE.MeshPhysicalMaterial({
+    color: 0xffffff, vertexColors: true, metalness: 0.96, roughness: 0.20
+  });
+}
+
+/**
+ * Tono metálico a juego con el color del equipo: mismo matiz, pero claro.
+ * Los aros y la placa de la cámara son metal pulido; si se les deja el color
+ * del cuerpo, en los equipos oscuros se funden con el negro de los lentes.
+ */
+function tonoMetal(hex) {
   const c = new THREE.Color(hex);
   const hsl = {}; c.getHSL(hsl);
-  c.setHSL(hsl.h, hsl.s * 0.55, Math.min(0.82, hsl.l * 0.85 + 0.22));
-  return new THREE.MeshPhysicalMaterial({ color: c, metalness: 0.98, roughness: 0.22 });
+  c.setHSL(hsl.h, hsl.s * 0.45, 0.45 + hsl.l * 0.35);
+  return c;
+}
+
+/** Placa del módulo y aros de los lentes: metal liso, sin degradado.
+    No va a metalness 1: un metal puro solo devuelve el reflejo y, contra el
+    negro de los lentes, desaparece. Con algo de color propio se sostiene. */
+function matMetal(hex) {
+  return new THREE.MeshPhysicalMaterial({
+    color: tonoMetal(hex), metalness: 0.86, roughness: 0.22
+  });
 }
 
 const matCristal = () => new THREE.MeshPhysicalMaterial({
@@ -118,10 +182,6 @@ const matCristal = () => new THREE.MeshPhysicalMaterial({
 
 const matNegro = () => new THREE.MeshPhysicalMaterial({
   color: 0x0a0b0e, metalness: 0.5, roughness: 0.12
-});
-
-const matAro = () => new THREE.MeshPhysicalMaterial({
-  color: 0x8b8f96, metalness: 1, roughness: 0.25
 });
 
 const matLente = () => new THREE.MeshPhysicalMaterial({
@@ -246,9 +306,11 @@ export function construirEquipo(eq, idxColor = 0) {
     steps: 1
   });
   geoCuerpo.center();
+  // Los equipos van de una tonalidad a otra en diagonal, no son de color plano.
+  pintarDegradado(geoCuerpo, color.hex, color.hex2 || color.hex, color.giro ?? -55);
 
   // ExtrudeGeometry separa: grupo 0 = tapas (frente y dorso), grupo 1 = canto lateral.
-  const cuerpo = new THREE.Mesh(geoCuerpo, [matCuerpo(color.hex, color.acabado), matMarco(color.hex)]);
+  const cuerpo = new THREE.Mesh(geoCuerpo, [matCuerpo(color.acabado), matMarco()]);
   cuerpo.castShadow = true;
   cuerpo.receiveShadow = true;
   grupo.add(cuerpo);
@@ -309,48 +371,65 @@ export function construirEquipo(eq, idxColor = 0) {
     const sal = (cam.saliente ?? 1.4) * MM;
     const cb = sal * 0.35;
 
+    // La placa del módulo es metálica (dorada en el Blush Gold, a juego con el
+    // equipo en los demás). Toma el primer tono, que es el que corre por la
+    // parte alta del dorso, justo donde va la cámara.
+    const metal = cam.metal || color.metal || color.hex;
+
     const geoMod = new THREE.ExtrudeGeometry(shapeModulo(cam, mw, mh, mr), {
       depth: sal, bevelEnabled: true, bevelThickness: cb, bevelSize: cb,
       bevelSegments: 6, curveSegments: 48, steps: 1
     });
-    const modulo = new THREE.Mesh(geoMod, [
-      matCuerpo(color.hex, 'brillante'),
-      matMarco(color.hex)
-    ]);
+    const modulo = new THREE.Mesh(geoMod, matMetal(metal));
     modulo.position.set(-cam.cx * MM, cam.cy * MM, zDorso - cb * 0.6);
     modulo.castShadow = true;
     dorso.add(modulo);
 
     const zTapa = modulo.position.z + sal + cb;   // superficie del módulo
 
-    // Lentes
+    /* Lentes. Cada uno son tres piezas, como en el equipo real:
+       un aro metálico grueso, un disco negro que ocupa casi todo,
+       y la óptica —pequeña y descentrada— dentro de ese disco. */
     for (const l of (cam.lentes || [])) {
       const d = l.d * MM;
       const lx = modulo.position.x - l.x * MM;    // la X va espejada dentro del dorso
       const ly = modulo.position.y + l.y * MM;
+      const alto = 0.10;                          // cuánto sobresale el conjunto
 
-      const aro = new THREE.Mesh(new THREE.CylinderGeometry(d / 2, d / 2 * 0.94, 0.06, 44), matAro());
+      const aro = new THREE.Mesh(new THREE.CylinderGeometry(d / 2, d / 2 * 0.97, alto, 48), matMetal(metal));
       aro.rotation.x = Math.PI / 2;
-      aro.position.set(lx, ly, zTapa + 0.01);
+      aro.position.set(lx, ly, zTapa + alto / 2);
       dorso.add(aro);
 
-      const hueco2 = new THREE.Mesh(new THREE.CylinderGeometry(d / 2 * 0.80, d / 2 * 0.80, 0.05, 44), alFrente(matNegro(), 1));
-      hueco2.rotation.x = Math.PI / 2;
-      hueco2.position.set(lx, ly, zTapa + 0.022);
-      dorso.add(hueco2);
+      const disco = new THREE.Mesh(new THREE.CircleGeometry(d / 2 * 0.76, 48), alFrente(matNegro(), 2));
+      disco.position.set(lx, ly, zTapa + alto + 0.004);
+      dorso.add(disco);
 
-      const lente = new THREE.Mesh(new THREE.CircleGeometry(d / 2 * 0.62, 40), alFrente(matLente(), 3));
-      lente.position.set(lx, ly, zTapa + 0.042);
-      dorso.add(lente);
+      // La óptica no va al centro del disco: queda cargada hacia abajo-derecha.
+      const dOpt = d * (l.optica ?? 0.30);
+      const off = d * 0.13;
+      const optica = new THREE.Mesh(new THREE.CircleGeometry(dOpt / 2, 40), alFrente(matLente(), 4));
+      optica.position.set(lx + off * 0.35, ly - off, zTapa + alto + 0.012);
+      dorso.add(optica);
+
+      const brillo = new THREE.Mesh(new THREE.CircleGeometry(dOpt / 2 * 0.45, 28),
+        alFrente(new THREE.MeshPhysicalMaterial({
+          color: 0x2f6ea8, metalness: 1, roughness: 0.05
+        }), 5));
+      brillo.position.copy(optica.position);
+      brillo.position.z += 0.006;
+      dorso.add(brillo);
     }
 
-    // Flash
+    // Flash: pastilla alargada, no un punto
     if (cam.flash) {
       const d = cam.flash.d * MM;
-      const f = new THREE.Mesh(new THREE.CircleGeometry(d / 2, 28), alFrente(new THREE.MeshPhysicalMaterial({
-        color: 0xfff0cf, emissive: 0xffdca0, emissiveIntensity: 0.35, roughness: 0.25, metalness: 0.1
+      const g = uvCaja(new THREE.ShapeGeometry(shapeRect(d, d * 2.1, d / 2), 20));
+      const f = new THREE.Mesh(g, alFrente(new THREE.MeshPhysicalMaterial({
+        color: 0xfff2d6, emissive: 0xffdca0, emissiveIntensity: 0.3, roughness: 0.22, metalness: 0.1
       }), 2));
-      f.position.set(modulo.position.x - cam.flash.x * MM, modulo.position.y + cam.flash.y * MM, zTapa + 0.03);
+      f.rotation.z = Math.PI / 2;
+      f.position.set(modulo.position.x - cam.flash.x * MM, modulo.position.y + cam.flash.y * MM, zTapa + 0.02);
       dorso.add(f);
     }
   }
@@ -362,7 +441,8 @@ export function construirEquipo(eq, idxColor = 0) {
         depth: ancho, bevelEnabled: true, bevelThickness: ancho * 0.4, bevelSize: ancho * 0.4,
         bevelSegments: 4, curveSegments: 16, steps: 1
       });
-      const m = new THREE.Mesh(g, matMarco(color.hex));
+      // Los botones son piezas chicas: color metálico liso, sin degradado propio.
+      const m = new THREE.Mesh(g, matMetal(color.hex2 || color.hex));
       m.rotation.y = Math.PI / 2;   // el grosor del botón apunta hacia +X
       m.castShadow = true;
       return m;
@@ -405,7 +485,7 @@ function entornoEstudio(renderer) {
 
   const sala = new THREE.Mesh(
     new THREE.BoxGeometry(60, 60, 60),
-    new THREE.MeshBasicMaterial({ color: 0xd8dae0, side: THREE.BackSide })
+    new THREE.MeshBasicMaterial({ color: 0xe4e6ec, side: THREE.BackSide })
   );
   esc.add(sala);
 
@@ -419,8 +499,11 @@ function entornoEstudio(renderer) {
   panel(34, 20, 0xffffff, [0, 29, 0], [Math.PI / 2, 0, 0]);          // softbox cenital
   panel(20, 30, 0xf2f4f8, [-29, 4, 6], [0, Math.PI / 2, 0]);         // relleno izquierdo
   panel(16, 26, 0x2c2f38, [29, 2, -4], [0, -Math.PI / 2, 0]);        // bandera oscura (define el canto)
-  panel(24, 16, 0x24262e, [0, -2, -29], [0, 0, 0]);                  // fondo oscuro
+  panel(24, 16, 0x30323a, [0, -2, -29], [0, 0, 0]);                  // fondo
   panel(40, 40, 0xb9bcc4, [0, -18, 0], [-Math.PI / 2, 0, 0]);        // piso
+  // Panel frontal: sin él, los aros metálicos de la cámara se ven negros
+  // al mirar el dorso, porque el metal solo devuelve lo que tiene enfrente.
+  panel(32, 30, 0xf4f6fa, [0, 3, 29], [0, Math.PI, 0]);
 
   const tex = pmrem.fromScene(esc, 0.03).texture;
   esc.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });

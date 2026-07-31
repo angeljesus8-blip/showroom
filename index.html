@@ -420,6 +420,10 @@ function bucle() {
 /* ── Interfaz ───────────────────────────────────────────── */
 const mxn = n => '$' + n.toLocaleString('es-MX');
 
+/** El circulito de color también degrada, igual que el equipo. */
+const fondoColor = c =>
+  c.hex2 && c.hex2 !== c.hex ? `linear-gradient(135deg, ${c.hex} 0%, ${c.hex2} 100%)` : c.hex;
+
 /** Fecha de HOY en local (nunca toISOString: México es UTC-6 y adelantaría el día por la tarde). */
 function hoyISO() {
   const d = new Date();
@@ -464,7 +468,7 @@ function pintarFicha() {
   e.colores.forEach((c, i) => {
     const b = document.createElement('button');
     b.className = 'swatch' + (i === iColor ? ' sel' : '');
-    b.style.background = c.hex;
+    b.style.background = fondoColor(c);
     b.title = c.n;
     b.setAttribute('aria-label', c.n);
     b.onclick = () => { iColor = i; armar(); pintarFicha(); pintarCarrusel(); };
@@ -540,7 +544,7 @@ function pintarCarrusel() {
     const t = document.createElement('button');
     t.className = 'tarjeta' + (i === iEquipo ? ' sel' : '');
     t.innerHTML =
-      `<div class="mini ${e.tipo === 'tablet' ? 'tablet' : ''}" style="background:${(i === iEquipo ? e.colores[iColor] : e.colores[0])?.hex}"></div>` +
+      `<div class="mini ${e.tipo === 'tablet' ? 'tablet' : ''}" style="background:${fondoColor((i === iEquipo ? e.colores[iColor] : e.colores[0]) || {})}"></div>` +
       `<span>${e.nombre}</span>` +
       (p?.hayPromo ? `<small>OFERTA</small>` : '');
     t.onclick = () => {

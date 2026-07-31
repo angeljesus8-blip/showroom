@@ -16,6 +16,19 @@
      dim.w = ancho     dim.h = alto     dim.t = grosor
      dim.r = qué tan redondas son las esquinas (12–16 típico)
 
+   ─── COLORES ──────────────────────────────────────────────
+   Los equipos no son de un color plano: van de una tonalidad a
+   otra. Por eso cada color lleva DOS tonos.
+     hex   = tono donde empieza     hex2 = tono donde termina
+     giro  = dirección del degradado en grados; el valor por
+             omisión deja el primer tono arriba y el segundo abajo
+     metal = color de la placa de la cámara, si es distinto
+   Si un equipo sí fuera de un solo color, basta con poner hex.
+
+   El truco para sacarlos exactos: en la página del equipo en
+   consumer.huawei.com, el selector de color trae el degradado
+   como CSS; de ahí salieron los del Pura 90s Pro.
+
    ─── verificar: true ──────────────────────────────────────
    Marca el equipo como "datos por confirmar" y la app le pone
    un aviso visible. Cuando ya cotejaste la ficha oficial,
@@ -59,24 +72,28 @@ window.CATALOGO = [
       // y los otros dos arriba, con el flash en medio.
       forma: 'triangulo',              // 'triangulo' | 'circulo' | 'cuadrado' | 'pildora'
       giro: 180,                       // 0 = punta arriba, 180 = punta abajo
-      cx: 0, cy: 42,                   // centro del módulo, desde el centro del equipo
-      ancho: 56, alto: 56, radio: 10,  // en el triángulo, "radio" redondea las 3 puntas
+      cx: 5, cy: 42,                   // el módulo NO va centrado: se carga al lado de los botones
+      ancho: 56, alto: 56, radio: 8,   // en el triángulo, "radio" redondea las 3 puntas
       saliente: 1.8,                   // cuánto sobresale del dorso (mm)
+      // Los lentes son grandes: casi se tocan entre sí, como en el equipo real
       lentes: [                        // x/y dentro del módulo, d = diámetro del aro
-        { x: 0,      y: -12.3, d: 19 },// 50 MP principal (el grande, abajo)
-        { x: -10.65, y: 6.15,  d: 16 },// 200 MP telefoto
-        { x: 10.65,  y: 6.15,  d: 15 } // 40 MP ultra gran angular
+        { x: 0,     y: -13.4, d: 21 }, // 50 MP principal (el grande, abajo)
+        { x: -11.6, y: 6.7,   d: 19 }, // 200 MP telefoto
+        { x: 11.6,  y: 6.7,   d: 18 }  // 40 MP ultra gran angular
       ],
-      flash: { x: 0, y: 6.15, d: 3.5 }
+      flash: { x: 0, y: 6.7, d: 1.7 }
     },
 
-    // Tono muestreado de la foto oficial; nombre comercial y orden según los SKUs
-    // de preventa del tablero (CEA 243). Solo llega en 12/512 GB.
+    /* Cada color va de una tonalidad a otra (hex → hex2), como el equipo real.
+       Tonos muestreados de los dos extremos del degradado en la foto oficial.
+       Nombre comercial y orden según los SKUs de preventa del tablero (CEA 243);
+       en la web de Huawei México los llaman Negro Grafito / Dorado Solar /
+       Naranja Celeste. Solo llega en 12/512 GB. */
     colores: [
-      { n: 'Graphite Black', hex: '#1d1d1b', acabado: 'mate' },
-      { n: 'Blush Gold',     hex: '#ece7e0', acabado: 'brillante' },
-      { n: 'Blaze Purple',   hex: '#8579bd', acabado: 'brillante' },
-      { n: 'Orange Ocean',   hex: '#8ad3e6', acabado: 'brillante' }
+      { n: 'Graphite Black', hex: '#24231f', hex2: '#56554f', acabado: 'mate' },
+      { n: 'Blush Gold',     hex: '#faf7f2', hex2: '#e0c9a2', acabado: 'brillante', metal: '#c9ab72' },
+      { n: 'Blaze Purple',   hex: '#9890c4', hex2: '#efdbcc', acabado: 'brillante' },
+      { n: 'Orange Ocean',   hex: '#8fd9ea', hex2: '#f8ae76', acabado: 'brillante' }
     ],
 
     precio: null,                      // Ángel pidió no mostrar precios
@@ -118,22 +135,26 @@ window.CATALOGO = [
     camara: {
       forma: 'triangulo',
       giro: 180,                          // punta hacia abajo, igual que el Pro Max
-      cx: 0, cy: 40, ancho: 52, alto: 52, radio: 9.5, saliente: 1.7,
+      cx: 5, cy: 40, ancho: 52, alto: 52, radio: 7.5, saliente: 1.7,
       lentes: [
-        { x: 0,     y: -11,  d: 18 },     // 50 MP principal (el grande, abajo)
-        { x: -9.53, y: 5.5,  d: 15 },     // 50 MP macro telefoto
-        { x: 9.53,  y: 5.5,  d: 14 }      // 12.5 MP ultra gran angular
+        { x: 0,     y: -12.4, d: 19.5 },  // 50 MP principal (el grande, abajo)
+        { x: -10.7, y: 6.2,   d: 17.5 },  // 50 MP macro telefoto
+        { x: 10.7,  y: 6.2,   d: 16.5 }   // 12.5 MP ultra gran angular
       ],
-      flash: { x: 0, y: 5.5, d: 3.2 }
+      flash: { x: 0, y: 6.2, d: 1.6 }
     },
 
-    // Tono muestreado de la foto oficial; nombre comercial y orden según los SKUs
-    // de preventa del tablero (CEA 243). Llega en 12/512 y 12/256 GB.
+    /* Estos degradados son los EXACTOS de la web de Huawei México
+       (consumer.huawei.com/mx/offer/telefonos/pura90s-pro-buy/): están ahí como
+       CSS del selector de color, así que no hay estimación de por medio.
+       Nombre y orden según los SKUs de preventa del tablero (CEA 243);
+       en la web al Orange Soda lo llaman "Naranja Spritz".
+       Llega en 12/512 y 12/256 GB. */
     colores: [
-      { n: 'Coconut White',  hex: '#ebe8e3', acabado: 'brillante' },
-      { n: 'Mulberry Black', hex: '#48494b', acabado: 'mate' },
-      { n: 'Guava Soda',     hex: '#f5cfcb', acabado: 'brillante' },
-      { n: 'Orange Soda',    hex: '#e3703f', acabado: 'brillante' }
+      { n: 'Coconut White',  hex: '#fbe0d9', hex2: '#fbfcf5', acabado: 'brillante' },
+      { n: 'Mulberry Black', hex: '#393a3b', hex2: '#9a9b9c', acabado: 'mate' },
+      { n: 'Guava Soda',     hex: '#ffc3c1', hex2: '#d2f5a8', acabado: 'brillante' },
+      { n: 'Orange Soda',    hex: '#ef7343', hex2: '#fde8a5', acabado: 'brillante' }
     ],
 
     precio: null,                         // Ángel pidió no mostrar precios
