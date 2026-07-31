@@ -59,14 +59,14 @@
     /* Exactamente el gris de fondo del visor de HUAWEI (muestreado: 241,243,245).
        Si no coincide, se ve el recuadro del marco cuando no ocupa todo el ancho. */
     background:#f1f3f5;
-    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
   }
-  /* El ancho lo fija el guion en función del alto: el visor de HUAWEI acomoda
-     sus botones encima del equipo cuando el marco le queda ancho y bajo. */
+  /* Alto y ancho los fija el guion. El marco se ancla abajo porque puede ser
+     más alto que lo que se ve: lo que se recorta es el vacío de arriba. */
   .visor iframe{
     display:block;
-    height:100%;
-    width:100%;
+    position:absolute; bottom:0; left:50%;
+    transform:translateX(-50%);
     border:0;
   }
 
@@ -262,17 +262,29 @@ function cargarVisor() {
   marco.src = VISOR_3D;
 }
 
-/* El visor de HUAWEI acomoda su selector de modelo y de color encima del equipo
-   cuando el marco le queda ancho y bajo. Se le limita el ancho en proporción a
-   su alto para que siempre tenga sitio donde poner los botones. */
+/* El visor de HUAWEI dibuja el equipo de un tamaño fijo, centrado, y planta su
+   selector de modelo y color a ~85 px del borde inferior. Resultado: si el marco
+   mide menos de unos 730 px de alto, los botones caen sobre el equipo. Y no se
+   arregla estrechándolo, porque el ancho no cambia el alto del equipo.
+
+   Lo que sí funciona: darle al marco esa altura mínima aunque no quepa, anclarlo
+   abajo y recortar lo que sobra por arriba — que es justo el vacío sobre el
+   equipo. Así los botones quedan siempre despejados. */
+const ALTO_MINIMO = 780;
 const seccionVisor = document.querySelector('.visor');
+
 function ajustarMarco() {
   const alto = seccionVisor.clientHeight;
   const ancho = seccionVisor.clientWidth;
   if (!alto || !ancho) return;
-  const util = Math.min(ancho, Math.round(alto * 1.05));
+
+  const altoMarco = Math.max(alto, ALTO_MINIMO);
+  const util = Math.min(ancho, Math.round(altoMarco * 1.05));
+
+  marco.style.height = altoMarco + 'px';
   marco.style.width = util + 'px';
-  // Las nubes viven sobre el marco, no sobre toda la sección
+  // Las nubes cubren solo lo que se ve, y del ancho del marco: si se les deja
+  // el de la sección, en pantalla ancha se van a las orillas.
   document.getElementById('nubes').style.width = util + 'px';
 }
 new ResizeObserver(ajustarMarco).observe(seccionVisor);
@@ -287,13 +299,16 @@ window.addEventListener('offline', () => caido.classList.add('on'));
 /* ── Nubes de características ───────────────────────────
    No se puede saber dónde está el equipo dentro del visor (es de otro
    sitio), pero sí que queda centrado y que gira sobre su eje. Por eso las
-   nubes van a los lados, en porcentajes: el centro siempre queda libre. */
+   nubes van a los lados, en porcentajes: el centro siempre queda libre.
+
+   Se reparten en la mitad de arriba: abajo van el selector de modelo y el de
+   color del propio visor, y una nube ahí los rozaría en pantallas bajitas. */
 const SITIOS = [
-  { x: 5,  y: 14 },   // arriba izquierda
-  { x: 66, y: 26 },   // arriba derecha
-  { x: 3,  y: 44 },   // media izquierda
-  { x: 68, y: 56 },   // media derecha
-  { x: 6,  y: 72 }    // abajo izquierda
+  { x: 5,  y: 10 },   // arriba izquierda
+  { x: 66, y: 20 },   // arriba derecha
+  { x: 3,  y: 34 },   // media izquierda
+  { x: 68, y: 46 },   // media derecha
+  { x: 6,  y: 58 }    // abajo izquierda
 ];
 
 const capaNubes = $('#nubes');
