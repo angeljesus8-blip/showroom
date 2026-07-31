@@ -11,7 +11,14 @@ proveedor. No se copia nada: es el mismo visor que Huawei publica en su página,
 que el equipo se ve exactamente como es. Trae su propio selector de modelo y de
 color, en español.
 
-Debajo va la ficha técnica en lenguaje de cliente, esa sí nuestra.
+Las características salen como **nubes flotando junto al equipo**: el cliente toca
+"Ver características" y van apareciendo una tras otra. Van a los lados, nunca encima
+del producto, y se pueden seguir girando el equipo con ellas puestas.
+
+**Por qué a los lados y no ancladas a cada pieza:** el visor es de otro sitio, así que
+no se puede saber dónde está el equipo dentro ni hacia dónde lo giró el cliente. Lo que
+sí se sabe es que queda centrado y gira sobre su eje — por eso el centro siempre está
+libre y ahí es donde no se ponen nubes.
 
 ---
 
@@ -38,6 +45,11 @@ cargar.** Si eso pasa:
 
 Todo vive en **`catalogo.js`**. Es el único archivo que se toca para contenido.
 Arriba del archivo están las instrucciones completas.
+
+Las nubes salen del campo **`nubes`** de cada equipo: máximo 5, y son **ganchos de
+venta**, no la ficha completa. Texto corto, que se lea de lejos ("200 MP", no "Cámara
+principal de 200 megapíxeles con apertura f/2.6"). Si un equipo no trae `nubes`, se
+usan las primeras 5 de `specs`.
 
 **Ojo:** el selector de arriba (el del visor 3D) es de Huawei y **no se puede
 sincronizar** con nuestra ficha — el visor no acepta que le digan qué modelo mostrar.
