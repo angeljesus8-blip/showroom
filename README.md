@@ -3,50 +3,55 @@
 **En línea:** <https://angeljesus8-blip.github.io/showroom-hes1217/>
 · QR para abrirlo en las tablets: `QR_showroom.png`
 
+Muestra en 3D para las **tablets de piso**: el cliente gira el equipo con el dedo
+y le cambia el color, aunque no haya pieza física en exhibición.
 
-Muestra en 3D para las **tablets de piso**: el cliente gira el equipo con el dedo,
-ve los colores reales y lo compara de tamaño con otro, aunque no haya pieza física
-en exhibición.
+La vista 3D es el **visor oficial de HUAWEI**, embebido tal cual desde su propio
+proveedor. No se copia nada: es el mismo visor que Huawei publica en su página, así
+que el equipo se ve exactamente como es. Trae su propio selector de modelo y de
+color, en español.
 
-No usa archivos de modelo 3D. Cada equipo se **dibuja por código** a partir de sus
-medidas en milímetros, así que agregar uno nuevo es escribir sus datos, nada más.
+Debajo va la ficha técnica en lenguaje de cliente, esa sí nuestra.
 
 ---
 
-## Actualizar precios o agregar equipos
+## ⚠️ Necesita internet
 
-Todo vive en **`catalogo.js`**. Es el único archivo que se toca.
+El visor viene de la página de HUAWEI, así que **sin wifi no hay 3D**. La app abre
+igual y muestra un aviso pidiendo revisar la conexión, en vez de quedarse en blanco.
 
-1. Abre `catalogo.js` — arriba están las instrucciones completas.
-2. Para un equipo nuevo: copia un bloque `{ ... }` entero, pégalo antes del `]`
-   final y cambia el `id` (no se puede repetir).
-3. Las medidas van en **milímetros**, tal como vienen en la ficha del fabricante
-   (`Dimensiones: 162.6 x 75.1 x 8.4 mm`).
-4. **Sube el número de versión en `sw.js`** (`const VERSION = 'showroom-v1'` →
-   `'showroom-v2'`). Si no, las tablets siguen mostrando lo viejo porque lo tienen
-   guardado.
-5. `git commit` + `git push`. GitHub Pages publica solo.
+## ⚠️ La dirección del visor va a cambiar
+
+La dirección del visor pertenece a una campaña (`project-h-2026q204-alpha`: trae el
+trimestre y la palabra "alpha"). **Cuando Huawei cambie de campaña, va a dejar de
+cargar.** Si eso pasa:
+
+1. Entra a la ficha del equipo en `consumer.huawei.com`
+2. Abre el visor 3D (el botón que dice **3D**)
+3. Mira el `src` del iframe que se abre
+4. Cambia `VISOR_3D` en `index.html` por esa dirección
+5. Súbele la versión a `sw.js` y haz push
+
+---
+
+## Actualizar la ficha o agregar equipos
+
+Todo vive en **`catalogo.js`**. Es el único archivo que se toca para contenido.
+Arriba del archivo están las instrucciones completas.
+
+**Ojo:** el selector de arriba (el del visor 3D) es de Huawei y **no se puede
+sincronizar** con nuestra ficha — el visor no acepta que le digan qué modelo mostrar.
+Por eso el selector de la ficha va rotulado "FICHA TÉCNICA", para que se entienda que
+son dos cosas distintas.
+
+Después de cualquier cambio, **sube el número de versión en `sw.js`**
+(`const VERSION = 'showroom-v3'` → `'showroom-v4'`). Si no, las tablets siguen
+mostrando lo viejo porque lo tienen guardado.
 
 ### Precios
 
-**Hoy no se muestran.** Todos los equipos traen `precio: null` y la app dice
-*"Pregunta el precio a tu asesor"*, así ninguna promo vencida contradice al mostrador.
-Si algún día los quieres visibles:
-
-```js
-precio: 21999,          // precio de lista
-promo: 19499,           // opcional; hace que el de lista salga tachado
-promoHasta: '2026-08-15'  // opcional; pasada la fecha, vuelve solo al de lista
-```
-
-La fecha se compara con el **día local** de México, no con UTC: una promo de último
-día sigue viva hasta la medianoche real, no desde las 6 de la tarde.
-
-### El aviso amarillo
-
-Un equipo con `verificar: true` muestra *"Ficha técnica por confirmar"*. Sirve para
-no dejar datos sin cotejar frente a un cliente. Cuando ya validaste la ficha oficial,
-borra esa línea y el aviso desaparece.
+No se muestran, por decisión de Ángel: la app dice *"Pregunta el precio a tu asesor"*,
+así ninguna promo vencida contradice al mostrador.
 
 ---
 
@@ -56,8 +61,8 @@ borra esa línea y el aviso desaparece.
 2. Menú ⋮ → **Agregar a pantalla de inicio**.
 3. Ábrelo desde el icono: entra a pantalla completa, sin barra de navegador.
 
-Si nadie la toca por ~1.5 minutos, la app **vuelve sola al primer equipo**, lista
-para el siguiente cliente.
+Si nadie la toca por ~1.5 minutos, el visor **se reinicia solo**, para que el
+siguiente cliente no lo encuentre girado y en otro color.
 
 ---
 
@@ -65,13 +70,10 @@ para el siguiente cliente.
 
 | Archivo | Qué es |
 |---|---|
-| `catalogo.js` | **Los datos.** Equipos, medidas, colores, precios, características. |
-| `index.html` | La pantalla: ficha, colores, comparador, carrusel. |
-| `modelo3d.js` | El motor 3D: convierte las medidas en un equipo dibujado. |
-| `vendor/three.module.min.js` | Three.js (la librería 3D), incluida para que funcione sin internet. |
-| `sw.js` | Hace que la app abra aunque se caiga el wifi. Súbele la versión al actualizar. |
-
----
+| `catalogo.js` | **Los datos.** Equipos, medidas, colores, características. |
+| `index.html` | La pantalla: visor embebido + ficha. `VISOR_3D` es la dirección del visor. |
+| `sw.js` | Hace que el cascarón abra rápido. Súbele la versión al actualizar. |
+| `modelo3d.js` + `vendor/` | **Respaldo, hoy sin usar.** Motor que dibuja los equipos por código a partir de sus medidas. Quedó de la versión anterior: si el visor de Huawei desaparece y no hay reemplazo, se puede reactivar. |
 
 ## Probar en la computadora
 
@@ -80,7 +82,4 @@ cd "C:\Users\bladi\CLAUDE ANGEL\showroom-hes1217"
 python -m http.server 5599
 ```
 
-Y abre <http://127.0.0.1:5599>.
-
-No sirve abrir `index.html` con doble clic: el navegador bloquea la carga de
-módulos desde archivos sueltos. Tiene que ser por servidor.
+Y abre <http://127.0.0.1:5599>. No sirve abrir el archivo con doble clic.

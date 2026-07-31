@@ -7,14 +7,15 @@
       SUBE ESTE NÚMERO. Si no, las tablets siguen mostrando
       la versión vieja porque la tienen guardada.
    ============================================================ */
-const VERSION = 'showroom-v2';
+const VERSION = 'showroom-v3';
 
+/* La vista 3D viene de la página de HUAWEI y NO se puede guardar: sin internet
+   la app abre, pero el visor muestra el aviso de "revisa el wifi".
+   modelo3d.js y three siguen en el repo como respaldo, sin usarse. */
 const ARCHIVOS = [
   './',
   './index.html',
   './catalogo.js',
-  './modelo3d.js',
-  './vendor/three.module.min.js',
   './logo_odemas.png',
   './icon-192.png',
   './icon-512.png',
