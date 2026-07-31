@@ -29,6 +29,13 @@
    consumer.huawei.com, el selector de color trae el degradado
    como CSS; de ahí salieron los del Pura 90s Pro.
 
+   ─── NUBES ────────────────────────────────────────────────
+   Son las que salen flotando junto al equipo cuando el cliente
+   toca "Ver características". Máximo 5 por equipo: son GANCHOS
+   DE VENTA, no la ficha completa. Texto corto, legible de lejos.
+     { t: 'Cámara', v: '200 MP' }
+   Si un equipo no las trae, se usan las primeras 5 de specs.
+
    ─── verificar: true ──────────────────────────────────────
    Marca el equipo como "datos por confirmar" y la app le pone
    un aviso visible. Cuando ya cotejaste la ficha oficial,
@@ -112,6 +119,17 @@ window.CATALOGO = [
       ['Memoria',   '12 GB RAM · 512 GB'],
       ['Peso',      '230.5 g']
     ],
+    // Las que salen flotando sobre el equipo al tocar "Ver características".
+    // Máximo 5: son ganchos de venta, no la ficha completa. Texto corto,
+    // que se lea de lejos y de un vistazo.
+    nubes: [
+      { t: 'Cámara',   v: '200 MP' },
+      { t: 'Zoom',     v: 'Óptico 4x · digital 100x' },
+      { t: 'Pantalla', v: '6.9" · 120 Hz' },
+      { t: 'Batería',  v: '6000 mAh' },
+      { t: 'Carga',    v: '100 W · llena en minutos' }
+    ],
+
     gancho: 'Zoom óptico 4x y 200 MP: acerca sin que la foto se despedace.'
   },
 
@@ -172,6 +190,14 @@ window.CATALOGO = [
       ['Resistencia', 'IP68 e IP69 · agua y polvo'],
       ['Peso',        '213.5 g']
     ],
+    nubes: [
+      { t: 'Macro',       v: 'Enfoca desde 5 cm' },
+      { t: 'Cámara',      v: 'Triple 50 + 50 MP' },
+      { t: 'Pantalla',    v: '6.6" · 120 Hz' },
+      { t: 'Batería',     v: '6000 mAh' },
+      { t: 'Resistencia', v: 'IP68 · IP69' }
+    ],
+
     gancho: 'Acerca el zoom a 5 cm: la foto macro que ningún otro hace.'
   }
 

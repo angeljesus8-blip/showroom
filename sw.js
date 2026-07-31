@@ -7,7 +7,7 @@
       SUBE ESTE NÚMERO. Si no, las tablets siguen mostrando
       la versión vieja porque la tienen guardada.
    ============================================================ */
-const VERSION = 'showroom-v4';
+const VERSION = 'showroom-v5';
 
 /* La vista 3D viene de la página de HUAWEI y NO se puede guardar: sin internet
    la app abre, pero el visor muestra el aviso de "revisa el wifi".

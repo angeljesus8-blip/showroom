@@ -56,7 +56,9 @@
     position:relative;
     flex:1 1 auto;
     min-height:56vh;
-    background:#f4f5f8;
+    /* Exactamente el gris de fondo del visor de HUAWEI (muestreado: 241,243,245).
+       Si no coincide, se ve el recuadro del marco cuando no ocupa todo el ancho. */
+    background:#f1f3f5;
     display:flex; align-items:center; justify-content:center;
   }
   /* El ancho lo fija el guion en función del alto: el visor de HUAWEI acomoda
@@ -89,74 +91,96 @@
   }
   .caido button:active{transform:scale(.97)}
 
-  /* ── Ficha ── */
+  /* ── Nubes de características ──
+     Van FLOTANDO junto al equipo, translúcidas. La capa no intercepta el
+     dedo (pointer-events:none) para que el cliente siga girando el equipo
+     por debajo; solo las nubes en sí son tocables. */
+  /* Del mismo ancho que el marco y centrada, no de toda la sección: si no,
+     en pantalla ancha las nubes se van a las orillas, lejos del equipo.
+     El ancho se lo pone el guion junto con el del marco. */
+  .nubes{
+    position:absolute; top:0; bottom:0; left:50%;
+    transform:translateX(-50%);
+    pointer-events:none;
+    z-index:3;
+  }
+  .nube{
+    position:absolute;
+    pointer-events:auto;
+    background:rgba(255,255,255,.82);
+    backdrop-filter:blur(14px) saturate(1.4);
+    -webkit-backdrop-filter:blur(14px) saturate(1.4);
+    border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 6px 26px rgba(28,31,38,.14), 0 1px 3px rgba(28,31,38,.08);
+    border-radius:16px;
+    padding:11px 17px;
+    max-width:31%;
+    opacity:0; transform:translateY(10px) scale(.94);
+    transition:opacity .45s cubic-bezier(.2,.8,.3,1), transform .45s cubic-bezier(.2,.8,.3,1);
+  }
+  .nube.entra{opacity:1;transform:none}
+  .nube .t{
+    display:block;font-size:10.5px;font-weight:700;letter-spacing:.12em;
+    color:var(--naranja);text-transform:uppercase;
+  }
+  .nube .v{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em;margin-top:3px;line-height:1.25}
+
+  /* Rótulo de a qué equipo pertenecen: el visor de arriba tiene su propio
+     selector y no se puede sincronizar, así que conviene dejarlo claro. */
+  .dequien{
+    position:absolute; left:50%; top:12px; transform:translateX(-50%);
+    background:rgba(28,31,38,.82); color:#fff;
+    backdrop-filter:blur(8px);
+    font-size:11.5px;font-weight:700;letter-spacing:.04em;
+    padding:7px 15px;border-radius:999px;white-space:nowrap;
+    opacity:0;transition:opacity .4s;
+  }
+  .dequien.entra{opacity:1}
+
+  /* ── Tira de la ficha ── */
   .ficha{
-    flex:0 1 auto;
-    min-height:0;
+    flex:none;
     position:relative;
     border-top:1px solid var(--linea);
-    padding:14px 22px 0;
+    padding:11px 22px calc(11px + env(safe-area-inset-bottom));
     background:#fff;
-    display:flex; flex-direction:column;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
   }
-  .ficha::after{
-    content:'';position:absolute;left:0;right:0;bottom:0;height:22px;
-    background:linear-gradient(to top,#fff 20%,rgba(255,255,255,0));
-    pointer-events:none;
+  .ficha .nom{font-size:16px;font-weight:800;letter-spacing:-.02em;margin-right:auto}
+  .ficha .nom small{
+    display:block;font-size:11px;font-weight:700;letter-spacing:.12em;
+    color:var(--gris);text-transform:uppercase;margin-bottom:1px;
   }
+  .verchar{
+    border:none;border-radius:13px;
+    background:var(--naranja);color:#fff;
+    font-family:var(--tipo);font-size:14.5px;font-weight:700;
+    padding:12px 22px;cursor:pointer;transition:.15s;
+    box-shadow:0 3px 12px rgba(243,112,33,.3);
+  }
+  .verchar:active{transform:scale(.96)}
+  .verchar.activo{background:var(--tinta);box-shadow:none}
 
-  /* Selector de ficha. Va rotulado a propósito: el visor de arriba tiene su
-     propio selector de modelo y no se pueden sincronizar (es de otro sitio). */
-  .cual{display:flex;align-items:center;gap:9px;flex-wrap:wrap;flex:none}
-  .cual .et{font-size:11.5px;font-weight:700;letter-spacing:.1em;color:var(--gris);text-transform:uppercase}
+  /* Selector de equipo. Manda sobre la ficha Y sobre las nubes. */
+  .cual{display:flex;align-items:center;gap:8px}
   .cual button{
     border:1.5px solid var(--linea);background:#fff;border-radius:11px;
-    padding:9px 16px;font-family:var(--tipo);font-size:13.5px;font-weight:700;color:var(--gris);
+    padding:9px 15px;font-family:var(--tipo);font-size:13px;font-weight:700;color:var(--gris);
     cursor:pointer;transition:.15s;
   }
   .cual button.sel{border-color:var(--naranja);color:var(--naranja);background:#fff7f2}
 
-  .cabecera{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-top:13px;flex:none}
-  .marca{margin:0;font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--gris);text-transform:uppercase}
-  .nombre{margin:3px 0 0;font-size:25px;font-weight:800;letter-spacing:-.025em;line-height:1.1}
-  .gancho{margin:5px 0 0;font-size:13.5px;color:var(--gris);font-weight:500;max-width:46ch;line-height:1.4}
-  .precio{
-    flex:none;white-space:nowrap;
-    font-size:13px;font-weight:700;color:var(--azul);line-height:1.35;text-align:right;
-    background:#f2f6fc;border:1px solid #d9e4f3;border-radius:12px;padding:9px 14px;
-  }
   .cinta{
-    display:inline-block;margin-top:8px;
     background:var(--rojo);color:#fff;
-    font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
-    padding:5px 11px;border-radius:7px;
+    font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    padding:5px 10px;border-radius:7px;
   }
   .cinta:empty{display:none}
 
-  .specs{
-    flex:1 1 auto;overflow-y:auto;
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-    align-content:start;   /* si no, las filas se estiran a lo alto de la columna */
-    gap:0 26px;margin-top:12px;padding-bottom:14px;
-    -webkit-overflow-scrolling:touch;
-  }
-  .specs div{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--linea)}
-  .specs dt{font-size:13px;font-weight:600;color:var(--gris)}
-  .specs dd{margin:0;font-size:13px;font-weight:700;text-align:right}
-
-  @media (max-height:1100px){
-    .nombre{font-size:22px}
-    .specs div{padding:7px 0}
-  }
-  @media (max-height:780px){
-    .gancho{display:none}
-    .nombre{font-size:20px}
-  }
-  @media (orientation:landscape) and (min-width:900px){
-    .cuerpo{flex-direction:row}
-    .visor{min-height:0}
-    .ficha{width:40%;border-top:none;border-left:1px solid var(--linea)}
-    .gancho{display:block}
+  @media (max-width:700px){
+    .ficha .nom{width:100%;margin-bottom:4px}
+    .nube{max-width:38%}
+    .nube .v{font-size:14px}
   }
 </style>
 </head>
@@ -179,6 +203,9 @@
             allow="accelerometer; gyroscope; xr-spatial-tracking"
             referrerpolicy="no-referrer-when-downgrade"></iframe>
 
+    <div class="nubes" id="nubes"></div>
+    <div class="dequien" id="dequien"></div>
+
     <div class="caido" id="caido">
       <div class="icono">📶</div>
       <h2>No se pudo abrir el visor 3D</h2>
@@ -189,19 +216,13 @@
   </section>
 
   <section class="ficha">
-    <div class="cual" id="cual"><span class="et">Ficha técnica</span></div>
-
-    <div class="cabecera">
-      <div>
-        <p class="marca" id="marca"></p>
-        <h2 class="nombre" id="nombre"></h2>
-        <p class="gancho" id="gancho"></p>
-        <span class="cinta" id="cinta"></span>
-      </div>
-      <div class="precio">Pregunta el precio<br>a tu asesor</div>
+    <div class="nom">
+      <small id="marca"></small>
+      <span id="nombre"></span>
     </div>
-
-    <dl class="specs" id="specs"></dl>
+    <span class="cinta" id="cinta"></span>
+    <div class="cual" id="cual"></div>
+    <button class="verchar" id="verchar">Ver características</button>
   </section>
 
 </div>
@@ -249,7 +270,10 @@ function ajustarMarco() {
   const alto = seccionVisor.clientHeight;
   const ancho = seccionVisor.clientWidth;
   if (!alto || !ancho) return;
-  marco.style.width = Math.min(ancho, Math.round(alto * 1.05)) + 'px';
+  const util = Math.min(ancho, Math.round(alto * 1.05));
+  marco.style.width = util + 'px';
+  // Las nubes viven sobre el marco, no sobre toda la sección
+  document.getElementById('nubes').style.width = util + 'px';
 }
 new ResizeObserver(ajustarMarco).observe(seccionVisor);
 ajustarMarco();
@@ -260,24 +284,84 @@ $('#reintentar').onclick = cargarVisor;
 window.addEventListener('online', cargarVisor);
 window.addEventListener('offline', () => caido.classList.add('on'));
 
+/* ── Nubes de características ───────────────────────────
+   No se puede saber dónde está el equipo dentro del visor (es de otro
+   sitio), pero sí que queda centrado y que gira sobre su eje. Por eso las
+   nubes van a los lados, en porcentajes: el centro siempre queda libre. */
+const SITIOS = [
+  { x: 5,  y: 14 },   // arriba izquierda
+  { x: 66, y: 26 },   // arriba derecha
+  { x: 3,  y: 44 },   // media izquierda
+  { x: 68, y: 56 },   // media derecha
+  { x: 6,  y: 72 }    // abajo izquierda
+];
+
+const capaNubes = $('#nubes');
+const dequien = $('#dequien');
+const botonChar = $('#verchar');
+let nubesVisibles = false;
+let animaciones = [];
+
+function ocultarNubes() {
+  animaciones.forEach(clearTimeout);
+  animaciones = [];
+  nubesVisibles = false;
+  botonChar.classList.remove('activo');
+  botonChar.textContent = 'Ver características';
+  dequien.classList.remove('entra');
+  capaNubes.querySelectorAll('.nube').forEach(n => n.classList.remove('entra'));
+  setTimeout(() => { if (!nubesVisibles) capaNubes.innerHTML = ''; }, 500);
+}
+
+function mostrarNubes() {
+  const e = EQUIPOS[iEquipo];
+  const lista = (e.nubes && e.nubes.length ? e.nubes
+    : (e.specs || []).slice(0, 5).map(([t, v]) => ({ t, v }))).slice(0, SITIOS.length);
+
+  capaNubes.innerHTML = '';
+  animaciones.forEach(clearTimeout);
+  animaciones = [];
+
+  lista.forEach((n, i) => {
+    const d = document.createElement('div');
+    d.className = 'nube';
+    d.style.left = SITIOS[i].x + '%';
+    d.style.top = SITIOS[i].y + '%';
+    d.innerHTML = `<span class="t">${n.t}</span><span class="v">${n.v}</span>`;
+    capaNubes.appendChild(d);
+    // Van saliendo una tras otra, no todas de golpe
+    animaciones.push(setTimeout(() => d.classList.add('entra'), 90 + i * 320));
+  });
+
+  dequien.textContent = `${e.marca || ''} ${e.nombre}`.trim();
+  dequien.classList.add('entra');
+
+  nubesVisibles = true;
+  botonChar.classList.add('activo');
+  botonChar.textContent = 'Ocultar';
+}
+
+botonChar.onclick = () => (nubesVisibles ? ocultarNubes() : mostrarNubes());
+
 /* ── Ficha ─────────────────────────────────────────────── */
 function pintar() {
   const e = EQUIPOS[iEquipo];
   $('#marca').textContent = e.marca || '';
   $('#nombre').textContent = e.nombre;
-  $('#gancho').textContent = e.gancho || '';
   $('#cinta').textContent = e.etiqueta || '';
-  $('#specs').innerHTML = (e.specs || [])
-    .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
 
   document.querySelectorAll('#cual button').forEach((b, i) =>
     b.classList.toggle('sel', i === iEquipo));
+
+  // Si las nubes estaban puestas, se rehacen con las del equipo nuevo
+  if (nubesVisibles) mostrarNubes();
 }
 
 const cual = $('#cual');
 EQUIPOS.forEach((e, i) => {
   const b = document.createElement('button');
-  b.textContent = e.nombre;
+  b.textContent = e.nombre.replace(/^Pura\s*/i, '');
+  b.title = e.nombre;
   b.onclick = () => { iEquipo = i; pintar(); };
   cual.appendChild(b);
 });
@@ -287,18 +371,18 @@ EQUIPOS.forEach((e, i) => {
    siguiente cliente no lo encuentre girado y en otro color. */
 const ESPERA = 100000;
 let ultima = Date.now();
+let yaReiniciado = true;   // evita recargar el visor una y otra vez de noche
+
 ['pointerdown', 'wheel', 'keydown', 'touchstart'].forEach(ev =>
-  document.addEventListener(ev, () => { ultima = Date.now(); }, { passive: true }));
+  document.addEventListener(ev, () => { ultima = Date.now(); yaReiniciado = false; }, { passive: true }));
 
 setInterval(() => {
-  if (Date.now() - ultima < ESPERA) return;
-  if (iEquipo === 0 && !caido.classList.contains('on')) {
-    // ya está en el estado inicial de la ficha; solo se reinicia el visor
-    cargarVisor();
-  } else {
-    iEquipo = 0; pintar(); cargarVisor();
-  }
-  ultima = Date.now();
+  if (yaReiniciado || Date.now() - ultima < ESPERA) return;
+  ocultarNubes();
+  iEquipo = 0;
+  pintar();
+  cargarVisor();
+  yaReiniciado = true;
 }, 10000);
 
 /* Evita que se salga del kiosco por gestos del navegador */
