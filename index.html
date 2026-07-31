@@ -123,19 +123,16 @@
     display:block;font-size:10.5px;font-weight:700;letter-spacing:.12em;
     color:var(--naranja);text-transform:uppercase;
   }
+  /* Dato que es igual en los dos equipos: se pone una sola vez */
   .nube .v{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em;margin-top:3px;line-height:1.25}
 
-  /* Rótulo de a qué equipo pertenecen: el visor de arriba tiene su propio
-     selector y no se puede sincronizar, así que conviene dejarlo claro. */
-  .dequien{
-    position:absolute; left:50%; top:12px; transform:translateX(-50%);
-    background:rgba(28,31,38,.82); color:#fff;
-    backdrop-filter:blur(8px);
-    font-size:11.5px;font-weight:700;letter-spacing:.04em;
-    padding:7px 15px;border-radius:999px;white-space:nowrap;
-    opacity:0;transition:opacity .4s;
+  /* Dato que cambia entre modelos: una línea por equipo */
+  .nube .fila{
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    margin-top:5px;
   }
-  .dequien.entra{opacity:1}
+  .nube .eq{font-size:11px;font-weight:700;color:var(--gris);white-space:nowrap}
+  .nube .dato{font-size:15px;font-weight:800;letter-spacing:-.02em;text-align:right}
 
   /* ── Tira de la ficha ── */
   .ficha{
@@ -215,7 +212,6 @@
             referrerpolicy="no-referrer-when-downgrade"></iframe>
 
     <div class="nubes" id="nubes"></div>
-    <div class="dequien" id="dequien"></div>
 
     <div class="caido" id="caido">
       <div class="icono">📶</div>
@@ -232,7 +228,6 @@
       <span id="nombre"></span>
     </div>
     <span class="cinta" id="cinta"></span>
-    <div class="cual" id="cual"></div>
     <button class="verchar" id="verchar">Ver características</button>
   </section>
 
@@ -255,7 +250,6 @@ const VISOR_3D = 'https://meta.kivisense.com/project-h-2026q204-alpha/phone.html
 
 const $ = s => document.querySelector(s);
 const EQUIPOS = window.CATALOGO;
-let iEquipo = 0;
 
 /* ── Visor ─────────────────────────────────────────────── */
 const marco = $('#visor3d');
@@ -328,7 +322,6 @@ const SITIOS = [
 ];
 
 const capaNubes = $('#nubes');
-const dequien = $('#dequien');
 const botonChar = $('#verchar');
 let nubesVisibles = false;
 let animaciones = [];
@@ -339,15 +332,12 @@ function ocultarNubes() {
   nubesVisibles = false;
   botonChar.classList.remove('activo');
   botonChar.textContent = 'Ver características';
-  dequien.classList.remove('entra');
   capaNubes.querySelectorAll('.nube').forEach(n => n.classList.remove('entra'));
   setTimeout(() => { if (!nubesVisibles) capaNubes.innerHTML = ''; }, 500);
 }
 
 function mostrarNubes() {
-  const e = EQUIPOS[iEquipo];
-  const lista = (e.nubes && e.nubes.length ? e.nubes
-    : (e.specs || []).slice(0, 5).map(([t, v]) => ({ t, v }))).slice(0, SITIOS.length);
+  const lista = (window.NUBES || []).slice(0, SITIOS.length);
 
   capaNubes.innerHTML = '';
   animaciones.forEach(clearTimeout);
@@ -358,14 +348,22 @@ function mostrarNubes() {
     d.className = 'nube';
     d.style.left = SITIOS[i].x + '%';
     d.style.top = SITIOS[i].y + '%';
-    d.innerHTML = `<span class="t">${n.t}</span><span class="v">${n.v}</span>`;
+
+    let cuerpo;
+    if (n.igual != null) {
+      cuerpo = `<span class="v">${n.igual}</span>`;
+    } else {
+      // Una línea por equipo, en el orden del catálogo
+      cuerpo = (n.valores || []).map((v, k) =>
+        `<div class="fila"><span class="eq">${EQUIPOS[k]?.corto || EQUIPOS[k]?.nombre || ''}</span>` +
+        `<span class="dato">${v}</span></div>`).join('');
+    }
+    d.innerHTML = `<span class="t">${n.t}</span>${cuerpo}`;
+
     capaNubes.appendChild(d);
     // Van saliendo una tras otra, no todas de golpe
     animaciones.push(setTimeout(() => d.classList.add('entra'), 90 + i * 320));
   });
-
-  dequien.textContent = `${e.marca || ''} ${e.nombre}`.trim();
-  dequien.classList.add('entra');
 
   nubesVisibles = true;
   botonChar.classList.add('activo');
@@ -374,28 +372,15 @@ function mostrarNubes() {
 
 botonChar.onclick = () => (nubesVisibles ? ocultarNubes() : mostrarNubes());
 
-/* ── Ficha ─────────────────────────────────────────────── */
+/* ── Tira de abajo ──────────────────────────────────────
+   Ya no hay selector de equipo: las nubes comparan los dos, así que
+   la tira nombra la serie completa. */
 function pintar() {
-  const e = EQUIPOS[iEquipo];
-  $('#marca').textContent = e.marca || '';
-  $('#nombre').textContent = e.nombre;
-  $('#cinta').textContent = e.etiqueta || '';
-
-  document.querySelectorAll('#cual button').forEach((b, i) =>
-    b.classList.toggle('sel', i === iEquipo));
-
-  // Si las nubes estaban puestas, se rehacen con las del equipo nuevo
-  if (nubesVisibles) mostrarNubes();
+  $('#marca').textContent = EQUIPOS[0]?.marca || '';
+  $('#nombre').textContent = window.TITULO || EQUIPOS.map(e => e.corto || e.nombre).join(' · ');
+  // La banderita sale si cualquiera de los dos la trae
+  $('#cinta').textContent = (EQUIPOS.find(e => e.etiqueta) || {}).etiqueta || '';
 }
-
-const cual = $('#cual');
-EQUIPOS.forEach((e, i) => {
-  const b = document.createElement('button');
-  b.textContent = e.nombre.replace(/^Pura\s*/i, '');
-  b.title = e.nombre;
-  b.onclick = () => { iEquipo = i; pintar(); };
-  cual.appendChild(b);
-});
 
 /* ── Modo kiosco ────────────────────────────────────────
    Tras un rato sin uso se recarga el visor, para que el
@@ -410,8 +395,6 @@ let yaReiniciado = true;   // evita recargar el visor una y otra vez de noche
 setInterval(() => {
   if (yaReiniciado || Date.now() - ultima < ESPERA) return;
   ocultarNubes();
-  iEquipo = 0;
-  pintar();
   cargarVisor();
   yaReiniciado = true;
 }, 10000);

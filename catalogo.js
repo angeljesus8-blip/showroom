@@ -31,10 +31,13 @@
 
    ─── NUBES ────────────────────────────────────────────────
    Son las que salen flotando junto al equipo cuando el cliente
-   toca "Ver características". Máximo 5 por equipo: son GANCHOS
-   DE VENTA, no la ficha completa. Texto corto, legible de lejos.
-     { t: 'Cámara', v: '200 MP' }
-   Si un equipo no las trae, se usan las primeras 5 de specs.
+   toca "Ver características". Se definen ABAJO DEL TODO, en
+   window.NUBES, y comparan los dos equipos a la vez.
+
+   ¿Por qué comparativas y no de un solo equipo? Porque el visor
+   3D es de HUAWEI y no hay forma de saber qué modelo tiene
+   puesto el cliente. Mostrando los dos, nunca se contradice con
+   lo que se ve en pantalla — y de paso el cliente compara.
 
    ─── verificar: true ──────────────────────────────────────
    Marca el equipo como "datos por confirmar" y la app le pone
@@ -62,6 +65,7 @@ window.CATALOGO = [
     id: 'pura90spromax',
     marca: 'HUAWEI',
     nombre: 'Pura 90s Pro Max',
+    corto: 'Pro Max',        // como se le llama en las nubes comparativas
     etiqueta: 'Preventa',              // banderita en la esquina. Borra la línea si no aplica
 
     dim: { w: 77.1, h: 164, t: 8.1, r: 16 },
@@ -119,16 +123,6 @@ window.CATALOGO = [
       ['Memoria',   '12 GB RAM · 512 GB'],
       ['Peso',      '230.5 g']
     ],
-    // Las que salen flotando sobre el equipo al tocar "Ver características".
-    // Máximo 5: son ganchos de venta, no la ficha completa. Texto corto,
-    // que se lea de lejos y de un vistazo.
-    nubes: [
-      { t: 'Cámara',   v: '200 MP' },
-      { t: 'Zoom',     v: 'Óptico 4x · digital 100x' },
-      { t: 'Pantalla', v: '6.9" · 120 Hz' },
-      { t: 'Batería',  v: '6000 mAh' },
-      { t: 'Carga',    v: '100 W · llena en minutos' }
-    ],
 
     gancho: 'Zoom óptico 4x y 200 MP: acerca sin que la foto se despedace.'
   },
@@ -139,6 +133,7 @@ window.CATALOGO = [
     id: 'pura90spro',
     marca: 'HUAWEI',
     nombre: 'Pura 90s Pro',
+    corto: 'Pro',
 
     dim: { w: 74.5, h: 157.8, t: 8.2, r: 15.5 },
 
@@ -190,15 +185,42 @@ window.CATALOGO = [
       ['Resistencia', 'IP68 e IP69 · agua y polvo'],
       ['Peso',        '213.5 g']
     ],
-    nubes: [
-      { t: 'Macro',       v: 'Enfoca desde 5 cm' },
-      { t: 'Cámara',      v: 'Triple 50 + 50 MP' },
-      { t: 'Pantalla',    v: '6.6" · 120 Hz' },
-      { t: 'Batería',     v: '6000 mAh' },
-      { t: 'Resistencia', v: 'IP68 · IP69' }
-    ],
 
     gancho: 'Acerca el zoom a 5 cm: la foto macro que ningún otro hace.'
   }
 
+];
+
+
+/* ============================================================
+   NUBES COMPARATIVAS
+   Las que flotan junto al equipo al tocar "Ver características".
+
+   Comparan los dos modelos a la vez, y esto es a propósito: el
+   visor 3D es de HUAWEI y no hay manera de saber cuál tiene
+   puesto el cliente. Mostrando ambos nunca se contradice con lo
+   que se ve, y además el cliente compara de un vistazo.
+
+   ─── CÓMO SE ESCRIBEN ───────────────────────────────────────
+   Si el dato CAMBIA entre modelos, va "valores", en el MISMO
+   ORDEN que los equipos de arriba (primero Pro Max, luego Pro):
+     { t: 'Cámara', valores: ['200 MP', '50 MP macro'] }
+
+   Si el dato es IGUAL en los dos, va "igual" y sale una sola vez:
+     { t: 'Batería', igual: '6000 mAh' }
+
+   Máximo 5: son GANCHOS DE VENTA, no la ficha completa. Texto
+   corto, que se lea de lejos y de un vistazo.
+   ============================================================ */
+
+/* Lo que dice la tira de abajo. Si lo borras, se arman los nombres cortos. */
+window.TITULO = 'Serie Pura 90s · Pro y Pro Max';
+
+/* Textos CORTOS: si una nube crece a tres líneas se encima con la de abajo. */
+window.NUBES = [
+  { t: 'Cámara',   valores: ['200 MP', '50 MP macro'] },
+  { t: 'Zoom',     valores: ['Hasta 100x', 'Macro a 5 cm'] },
+  { t: 'Pantalla', valores: ['6.9"', '6.6"'] },
+  { t: 'Carga',    valores: ['100 W', '66 W'] },
+  { t: 'Batería',  igual: '6000 mAh' }
 ];
