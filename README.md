@@ -1,5 +1,9 @@
 # Catálogo 3D — Odemás Angelópolis (HES 1217)
 
+**En línea:** <https://angeljesus8-blip.github.io/showroom-hes1217/>
+· QR para abrirlo en las tablets: `QR_showroom.png`
+
+
 Muestra en 3D para las **tablets de piso**: el cliente gira el equipo con el dedo,
 ve los colores reales y lo compara de tamaño con otro, aunque no haya pieza física
 en exhibición.
