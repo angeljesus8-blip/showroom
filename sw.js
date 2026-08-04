@@ -11,7 +11,7 @@
       SUBE ESTE NÚMERO. Si no, las tablets siguen mostrando
       la versión vieja porque la tienen guardada.
    ============================================================ */
-const VERSION = 'showroom-v13';
+const VERSION = 'showroom-v14';
 
 const ARCHIVOS = [
   './',
