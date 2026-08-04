@@ -1,7 +1,11 @@
 # Catálogo — Odemás Angelópolis (HES 1217)
 
-**En línea:** <https://angeljesus8-blip.github.io/showroom-hes1217/>
+**En línea:** <https://angeljesus8-blip.github.io/showroom/>
 · QR para abrirlo en las tablets: `QR_showroom.png`
+
+> El repo se llamaba `showroom-hes1217` y se renombró a `showroom` el 3-ago-2026.
+> La dirección vieja quedó en **404, GitHub no la redirige**: cualquier QR impreso
+> antes de esa fecha hay que reemplazarlo por el nuevo.
 
 Catálogo para las **tablets de piso**: el cliente ve el equipo, le cambia el color,
 compara memorias y ve el precio, aunque no haya pieza en exhibición.
