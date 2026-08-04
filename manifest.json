@@ -1,7 +1,7 @@
 {
-  "name": "Catálogo 3D — Odemás Angelópolis",
-  "short_name": "Catálogo 3D",
-  "description": "Muestra en 3D de los equipos que se venden aunque no estén en exhibición.",
+  "name": "Catálogo — Odemás",
+  "short_name": "Catálogo",
+  "description": "Los equipos que vendemos, aunque no estén en exhibición.",
   "start_url": "./index.html",
   "display": "fullscreen",
   "orientation": "portrait",
